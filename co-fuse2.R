@@ -54,21 +54,25 @@ countSamples <- function(inputDir) {
 }
 
 
-FisherTest <- function(inputDir,outputDir) { 
-  folders <- list.dirs(path=inputDir,full.names=FALSE,recursive=FALSE)
-  foldersFullName <- list.dirs(path=inputDir,full.names=TRUE,recursive=FALSE)
-  if (length(folders) != 2) {
-    stop("The input folder must contain two sub-folders (two groups)")
+FisherTest <- function(inputDirGroup1,inputDirGroup2,outputDir) { 
+  folders1 <- list.dirs(path=inputDirGroup1,full.names=TRUE,recursive=TRUE)
+  folders2 <- list.dirs(path=inputDirGroup2,full.names=TRUE,recursive=TRUE)
+
+  if (length(folders1) < 1) {
+    stop("The input folder (first group) must contain at least one sample!!")
+  } else if (length(folders2) < 1) {
+    stop("The input folder (second group) must contain at least one sample!!")
   }
   
-  group1 <- countSamples(foldersFullName[1])
-  Num.group1 <- paste0("Num.",folders[1])
-  Total.group1 <- paste0("Total.",folders[1])
+
+  group1 <- countSamples(inputDirGroup1)
+  Num.group1 <- paste0("Num.",basename(inputDirGroup1))
+  Total.group1 <- paste0("Total.",basename(inputDirGroup1))
   colnames(group1) <- c("geneA","geneB",Num.group1,Total.group1)
 
-  group2 <- countSamples(foldersFullName[2])
-  Num.group2 <- paste0("Num.",folders[2])
-  Total.group2 <- paste0("Total.",folders[2])
+  group2 <- countSamples(inputDirGroup2)
+  Num.group2 <- paste0("Num.",basename(inputDirGroup2))
+  Total.group2 <- paste0("Total.",basename(inputDirGroup2))
   colnames(group2) <- c("geneA","geneB",Num.group2,Total.group2)
   
   combined <- full_join(group1,group2,by=c("geneA","geneB"))
@@ -79,10 +83,6 @@ FisherTest <- function(inputDir,outputDir) {
   #
   # Filter out non-recurrent gene
   #
-  #combined <- combined %>% filter(! (Num.Group_1 == 1 & Num.Group_2 == 0) ) %>%
-  #  filter(! (Num.Group_1 == 0 & Num.Group_2 == 1) ) %>%
-  #  filter(! (Num.Group_1 == 1 & Num.Group_2 == 1) )  
-  
   combined <- combined %>% filter_(paste('! (',Num.group1,'==',1,' & ',Num.group2, '==', 0,')') ) %>%
     filter_(paste('! (',Num.group1, '==', 0, '& ',Num.group2, '==', 1,')') ) %>%
     filter_(paste('! (',Num.group1, '==', 1, '& ',Num.group2, '==', 1,')') )  
@@ -104,8 +104,8 @@ FisherTest <- function(inputDir,outputDir) {
                                                        Num2,Total2-Num2),2,2))$p.value)
   
   combined$pvalue <- fisher$pvalue
-  combined[[folders[1]]] <- group1_YN
-  combined[[folders[2]]] <- group2_YN
+  combined[[basename(inputDirGroup1)]] <- group1_YN
+  combined[[basename(inputDirGroup2)]] <- group2_YN
   
   res <- combined[,c(1,2,8,9,7,3,4,5,6)]
   
@@ -129,13 +129,13 @@ options(scipen=99)
 
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)!=2) {
-  stop(paste("Two arguments must be provided.\n",
-             "Usage: Rscript co-fuse2.R _INPUT_FOLDER_  _OUTPUT_FOLDER_  \n\n")
+if (length(args)!=3) {
+  stop(paste("Three arguments must be provided.\n",
+             "Usage: Rscript co-fuse2.R _GROUP_1_INPUT_FOLDER_  _GROUP_2_INPUT_FOLDER_  _OUTPUT_FOLDER_  \n\n")
              ,call.=FALSE)
-} else if (length(args)==2) {
-  cat("Evaluating the data set\n")
-  FisherTest(args[1],args[2])
+} else {
+  cat("Evaluating Fisher's Exact test\n")
+  FisherTest(args[1],args[2],args[3])
 }
 
 

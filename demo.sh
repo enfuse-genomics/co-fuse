@@ -15,5 +15,5 @@ fi
 
 Rscript --vanilla co-fuse.R './FusionCatcher/AML' './output_AML' $TSNE_PERPLEXITY
 Rscript --vanilla co-fuse.R './FusionCatcher/MM' './output_MM' $TSNE_PERPLEXITY
-Rscript --vanilla co-fuse2.R './FusionCatcher' './output_fisher_test'
+Rscript --vanilla co-fuse2.R './FusionCatcher/AML' './FusionCatcher/MM' './output_fisher_test'
 
