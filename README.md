@@ -48,17 +48,17 @@ The output will be stored in the folder `./output_group`. It consists of multipl
 #### Note
 1. Here we use FusionCatcher as our software. Other fusion algorithms can also be applied here. However, the code needs to be slightly modified. For example, line 59 in `co-fuse.R` would need to be modified:
 
-```
-filename <- list.files(path=folders[i],pattern="*.GRCh37.txt",full.name=TRUE,recursive=TRUE)
-```
+    ```
+    filename <- list.files(path=folders[i],pattern="*.GRCh37.txt",full.name=TRUE,recursive=TRUE)
+    ```
 
-Instead of setting `pattern="*.GRCh37.txt"`, one should set `pattern` to point to the output of other fusion softwares.
+    Instead of setting `pattern="*.GRCh37.txt"`, one should set `pattern` to point to the output of other fusion softwares.
 
-2. We assume the first two columns contain a pair of recurrent genes. FusionCatcher output a pair of gene (geneA and geneB) in the first two columns. For other fusion software, one might need to modify the following R code:
+2. We assume that the first two columns contain a pair of recurrent genes. FusionCatcher output a pair of gene (geneA and geneB) in the first two columns. For other fusion software, one might need to modify the following R code:
 
-```
-df <- data.frame(geneA=dat[,1],geneB=dat[,2],stringsAsFactors = F)
-```
+    ```
+    df <- data.frame(geneA=dat[,1],geneB=dat[,2],stringsAsFactors = F)
+    ```
 
 
 ### Fisher's Exact test
