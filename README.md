@@ -16,16 +16,38 @@ install.packages("tsne")
 install.packages("ggplots")
 ```
 
-## Demo
+## Demonstration
 
-We provide the demo script which will download the data set and run our R scripts as described in the paper. Please execute
+### FusionCatcher
+
+We provide the demo script which will reproduce the results reported in our paper. The script will download the data set and run both R scripts as described in the paper. Please execute:
 
 ```shell
-./demo.sh
+./demoFusionCatcher.sh
 ```
 
 The downloaded data set consists of FusionCatcher results [1] on two different groups of samples: `AML` and `MM`. Each group consists of multiple samples. The first experiment (Recurrent Fusions) calls the R script `co-fuse.R` to compute recurrent fusions in both `AML` and `MM`. Experimental results can be found in the folder `./output_AML` and `./output_MM`.
 The second experiment (Fisher's Exact test) calls the R scirpt `co-fuse2.R` to examine the relationship between gene fusions in `AML` and `MM`. Experimental results can be found in the folder `./output_fisher_test`.
+
+### SoapFuse, TopHat and DeFuse
+
+We provide the demo script to illustrate the use of our software with three other fusion softwares (SoapFuse, TopHat and DeFuse). The demo script can be executed by:
+
+```shell
+./demoSoapFuse.sh
+./demoTopHat.sh
+./demoDeFuse.sh
+```
+
+### Generic fusion software
+
+For other fusion softwares, we expect the first two columns to be Gene1 and Gene2. The demo script can be executed by:
+
+```shell
+./demoGeneric.sh
+```
+
+If you have any questions on other fusion softwares not described here, please feel free to contact us.
 
 ## Usage
 
@@ -34,7 +56,7 @@ The second experiment (Fisher's Exact test) calls the R scirpt `co-fuse2.R` to e
 The algorithm identify a set of recurrent fusion genes occurred across multiple samples. Assuming that the output of FusionCatchers can be found in the folder `FusionCatcher/group`, the re-current fusion algorithm can be executed as follow.
 
 ```
-Rscript --vanilla co-fuse.R './FusionCatcher/group' './output_group' _TSNE_PERPLEXITY_
+Rscript --vanilla co-fuse.R 'FusionCatcher' './FusionCatcher/group' './output_group' _TSNE_PERPLEXITY_
 ```
 
 Here `_TSNE_PERPLEXITY_` represents the perplexity parameter. It can be thought as a parameter that sets the number of effective nearest neighbors. A larger or denser dataset requires a larger perplexity. Typical values for the perplexity range between 5 and 50. We use the perplexity of 5 in our experiments.
@@ -45,8 +67,10 @@ The output will be stored in the folder `./output_group`. It consists of multipl
 - **heatmap.pdf** Cluster analysis to discover relationship between samples
 - **tsne_plot.pdf** Dimensionality reduction for visualizing samples using t-Distributed Stochastic Neighbor Embedding (t-SNE)
 
+
+<!--
 #### Note
-1. Here we use FusionCatcher as our software. Other fusion algorithms can also be applied here. However, the code needs to be slightly modified. For example, line 59 in `co-fuse.R` would need to be modified:
+1. Here we use FusionCatcher as our software. Other fusion algorithms can also be applied here. However, the code needs to be slightly modified. For example, line 59 in `co-fuse.R` would need to be modified: 
 
     ```
     filename <- list.files(path=folders[i],pattern="*.GRCh37.txt",full.name=TRUE,recursive=TRUE)
@@ -59,7 +83,7 @@ The output will be stored in the folder `./output_group`. It consists of multipl
     ```
     df <- data.frame(geneA=dat[,1],geneB=dat[,2],stringsAsFactors = F)
     ```
-
+-->
 
 ### Fisher's Exact test
 
