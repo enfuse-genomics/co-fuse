@@ -16,8 +16,11 @@ fusion.plot.heatmat <- function(data, outfilename)
   data.1 <- as.matrix(data[, 3:n])
   rownames(data.1) <- data$fusion
   my_palette <- colorRampPalette(c("grey", "black", "red"))
-  pdf(file=outfilename,width=20,height=20,paper='special')
-  heatmap.2(data.1, col=my_palette, distfun=function(x) dist(x, method="binary"), hclustfun=function(x) hclust(x, method="ward"), scale="none", cexRow=0.4, cexCol=0.5, density.info="none", trace="none", key=TRUE, symkey=FALSE)
+  pdfwidth <- ceiling(log(nrow(data.1))*3) + 1
+  pdf(file=outfilename,width=pdfwidth,height=pdfwidth,paper='special')
+  heatmap.2(data.1, col=my_palette, distfun=function(x) dist(x, method="binary"), 
+            hclustfun=function(x) hclust(x, method="ward"), scale="none", 
+            cexRow=0.4, cexCol=0.5, density.info="none", trace="none", key=TRUE, symkey=FALSE)
   dev.off()
 }
 
@@ -27,8 +30,8 @@ fusion.plot.tsne <- function(data, perplexity=perplexity, outfilename)
   #data$fusion <- paste(data$geneA, data$geneB, sep="-")
   n <- length(colnames(data))-1
   data.1 <- as.matrix(data[, 3:n])
-  
-  pdf(file=outfilename,width=20,height=20,paper='special')
+  pdfwidth <- ceiling(log(nrow(data.1))*3) + 1
+  pdf(file=outfilename,width=pdfwidth,height=pdfwidth,paper='special')
   set.seed(123)
   d <- dist(t(data.1), method="binary")
   tsne.data <- tsne(d,perplexity=perplexity)
@@ -42,7 +45,29 @@ fusion.plot.tsne <- function(data, perplexity=perplexity, outfilename)
 
 
 
-countGene <- function(inputDir,outputDir,tsne_perplexity=5) { 
+countGene <- function(software,inputDir,outputDir,tsne_perplexity=5) { 
+  fusionSoftware <- tolower(software)
+  if (fusionSoftware == 'fusioncatcher') {
+    filepattern <- '*.GRCh37.txt'
+    geneACol <- 1; geneBCol <- 2; headerRow = TRUE;
+  } else if (fusionSoftware == 'defuse') {
+    filepattern <- '*.filtered.tsv'
+    geneACol <- 31; geneBCol <- 32; headerRow = TRUE;
+  } else if (fusionSoftware == 'tophat') {
+    filepattern <- '*.txt'
+    geneACol <- 2; geneBCol <- 5; headerRow = FALSE;
+  } else if (fusionSoftware == 'soapfuse') {
+    filepattern <- '*.specific.for.genes'
+    geneACol <- 1; geneBCol <- 6; headerRow = TRUE;
+  } else if (fusionSoftware == 'generic') {
+    filepattern <- '*.txt'
+    geneACol <- 1; geneBCol <- 2; headerRow = TRUE;
+  } else {
+    cat("For supporting of other softwares, please contact us.\n")
+    return
+  }
+  
+  
   folders <- list.dirs(path=inputDir,full.names=TRUE,recursive=TRUE)
   sampleNames <- list.dirs(path=inputDir,full.names=FALSE,recursive=TRUE)
   numFolders <- length(folders)
@@ -56,9 +81,9 @@ countGene <- function(inputDir,outputDir,tsne_perplexity=5) {
   # for each files in the folder
   for (i in 2:numFolders) {
     # load to data frame
-    filename <- list.files(path=folders[i],pattern="*.GRCh37.txt",full.name=TRUE,recursive=TRUE)
-    dat <- read.csv(file=filename,sep="\t",stringsAsFactors = F)
-    df <- data.frame(geneA=dat[,1],geneB=dat[,2],stringsAsFactors = F)
+    filename <- list.files(path=folders[i],pattern=filepattern,full.name=TRUE,recursive=TRUE)
+    dat <- read.csv(file=filename,sep="\t",header=headerRow,stringsAsFactors = F)
+    df <- data.frame(geneA=dat[,geneACol],geneB=dat[,geneBCol],stringsAsFactors = F)
     # remove duplicates within the file
     listAB[[i]] <- df %>% group_by(geneA,geneB) %>% filter(row_number() == 1)
     listA[[i]]  <- df %>% select(geneA) %>% group_by(geneA) %>% filter(row_number() == 1)
@@ -176,9 +201,9 @@ countGene <- function(inputDir,outputDir,tsne_perplexity=5) {
   #############################################################################
   tmp.softwareOutputs <- softwareOutputs
   tmp.res.AB <- res.AB %>% select(geneA,geneB)
-  colnames(tmp.softwareOutputs)[1:2] <- c("geneA","geneB")
+  colnames(tmp.softwareOutputs)[c(geneACol,geneBCol)] <- c("geneA","geneB")
   res.keepFusion <- tmp.softwareOutputs %>% inner_join(tmp.res.AB, by=c("geneA","geneB"))
-  colnames(res.keepFusion)[1:2] <- colnames(softwareOutputs)[1:2]
+  colnames(res.keepFusion)[c(geneACol,geneBCol)] <- colnames(softwareOutputs)[c(geneACol,geneBCol)]
   write.table(res.keepFusion,file=paste0(outputDir,'/OriginalSoftwareOutput.txt'),row.names=F,quote=F,sep='\t')
   
   
@@ -186,7 +211,8 @@ countGene <- function(inputDir,outputDir,tsne_perplexity=5) {
   # save figure (bar plot)
   #############################################################################  
   barplot.AB.filename <- paste0(outputDir,'/barplot.AB.pdf')
-  pdf(barplot.AB.filename,width=6,height=50,paper='special')
+  pdfheight <- ceiling(log(nrow(res.AB))*3) + 1
+  pdf(barplot.AB.filename,width=6,height=pdfheight,paper='special')
   par(las=2)
   par(mar=c(5,8,4,2)) # bottom,left,top,right
   yaxisName <- res.AB %>% mutate(geneAB=paste0(geneA,';',geneB)) %>% select(geneAB)
@@ -218,13 +244,19 @@ countGene <- function(inputDir,outputDir,tsne_perplexity=5) {
 
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)!=3) {
-  stop(paste("Three arguments must be provided.\n",
-             "Usage: Rscript co-fuse.R _INPUT_FOLDER_  _OUTPUT_FOLDER_  _TSNE_PERPLEXITY_\n\n")
+if (length(args)!=4) {
+  stop(paste("\n\n--------------------------------------------------------------------------------------\n\n",
+             "Four arguments must be provided.\n",
+             "Usage: Rscript co-fuse.R _SOFTWARE_ _INPUT_FOLDER_  _OUTPUT_FOLDER_  _TSNE_PERPLEXITY_\n\n",
+             "where _SOFTWARE_ is one of 'defuse', 'fusioncatcher', 'tophat', 'soapfuse' or 'generic'\n",
+             "      _INPUT_FOLDER_ is the folder containing the output of fusion software\n",
+             "      _OUTPUT_FOLDER_ is the folder containing the output of Co-Fuse\n",
+             "      _TSNE_PERPLEXITY_ is the parameter for TSNE (default 5)\n",
+             "\n\n--------------------------------------------------------------------------------------\n\n")
              ,call.=FALSE)
 } else {
   cat("Evaluating the data set\n")
-  countGene(args[1],args[2],as.numeric(args[3]))
+  countGene(args[1],args[2],args[3],as.numeric(args[4]))
 }
 
 

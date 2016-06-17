@@ -10,22 +10,47 @@ library(dplyr)
 #
 # Return fusion with the number of samples 
 #
-countSamples <- function(inputDir) { 
+countSamples <- function(software,inputDir) { 
+  
+  fusionSoftware <- tolower(software)
+  if (fusionSoftware == 'fusioncatcher') {
+    filepattern <- '*.GRCh37.txt'
+    geneACol <- 1; geneBCol <- 2; headerRow = TRUE;
+  } else if (fusionSoftware == 'defuse') {
+    filepattern <- '*.filtered.tsv'
+    geneACol <- 31; geneBCol <- 32; headerRow = TRUE;
+  } else if (fusionSoftware == 'tophat') {
+    filepattern <- '*.txt'
+    geneACol <- 2; geneBCol <- 5; headerRow = FALSE;
+  } else if (fusionSoftware == 'soapfuse') {
+    filepattern <- '*.specific.for.genes'
+    geneACol <- 1; geneBCol <- 6; headerRow = TRUE;
+  } else if (fusionSoftware == 'generic') {
+    filepattern <- '*.txt'
+    geneACol <- 1; geneBCol <- 2; headerRow = TRUE;
+  } else {
+    cat("For supporting of other softwares, please contact us.\n")
+    return
+  }  
+  
   folders <- list.dirs(path=inputDir,full.names=TRUE,recursive=TRUE)
   sampleNames <- list.dirs(path=inputDir,full.names=FALSE,recursive=TRUE)
   numFolders <- length(folders)
   
   listAB <- vector(mode="list", length=numFolders)
   
+  
   # for each files in the folder
   for (i in 2:numFolders) {
     # load to data frame
-    filename <- list.files(path=folders[i],pattern="*.GRCh37.txt",full.name=TRUE,recursive=TRUE)
-    dat <- read.csv(file=filename,sep="\t",stringsAsFactors = F)
-    df <- data.frame(geneA=dat[,1],geneB=dat[,2],stringsAsFactors = F)
+    filename <- list.files(path=folders[i],pattern=filepattern,full.name=TRUE,recursive=TRUE)
+    dat <- read.csv(file=filename,sep="\t",header=headerRow,stringsAsFactors = F)
+    df <- data.frame(geneA=dat[,geneACol],geneB=dat[,geneBCol],stringsAsFactors = F)
     # remove duplicates within the file
     listAB[[i]] <- df %>% group_by(geneA,geneB) %>% filter(row_number() == 1)
   }
+  
+  
   
   # union all genes
   merged.AB <- Reduce(function(...) merge(...,all=TRUE),listAB[2:numFolders])
@@ -54,7 +79,7 @@ countSamples <- function(inputDir) {
 }
 
 
-FisherTest <- function(inputDirGroup1,inputDirGroup2,outputDir) { 
+FisherTest <- function(software,inputDirGroup1,inputDirGroup2,outputDir) { 
   folders1 <- list.dirs(path=inputDirGroup1,full.names=TRUE,recursive=TRUE)
   folders2 <- list.dirs(path=inputDirGroup2,full.names=TRUE,recursive=TRUE)
 
@@ -65,12 +90,12 @@ FisherTest <- function(inputDirGroup1,inputDirGroup2,outputDir) {
   }
   
 
-  group1 <- countSamples(inputDirGroup1)
+  group1 <- countSamples(software,inputDirGroup1)
   Num.group1 <- paste0("Num.",basename(inputDirGroup1))
   Total.group1 <- paste0("Total.",basename(inputDirGroup1))
   colnames(group1) <- c("geneA","geneB",Num.group1,Total.group1)
 
-  group2 <- countSamples(inputDirGroup2)
+  group2 <- countSamples(software,inputDirGroup2)
   Num.group2 <- paste0("Num.",basename(inputDirGroup2))
   Total.group2 <- paste0("Total.",basename(inputDirGroup2))
   colnames(group2) <- c("geneA","geneB",Num.group2,Total.group2)
@@ -129,13 +154,19 @@ options(scipen=99)
 
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args)!=3) {
-  stop(paste("Three arguments must be provided.\n",
-             "Usage: Rscript co-fuse2.R _GROUP_1_INPUT_FOLDER_  _GROUP_2_INPUT_FOLDER_  _OUTPUT_FOLDER_  \n\n")
-             ,call.=FALSE)
+if (length(args)!=4) {
+  stop(paste("\n\n--------------------------------------------------------------------------------------\n\n",
+             "Four arguments must be provided.\n",
+             "Usage: Rscript co-fuse2.R _GROUP_1_INPUT_FOLDER_  _GROUP_2_INPUT_FOLDER_  _OUTPUT_FOLDER_ \n\n",
+             "where _SOFTWARE_ is one of 'defuse', 'fusioncatcher', 'tophat', 'soapfuse' or 'generic'\n",
+             "      _GROUP_1_INPUT_FOLDER_  is the folder containing the output of fusion software (GROUP 1)\n",
+             "      _GROUP_2_INPUT_FOLDER_  is the folder containing the output of fusion software (GROUP 2)\n",
+             "      _OUTPUT_FOLDER_ is the folder containing the output of Co-Fuse\n",
+             "\n\n--------------------------------------------------------------------------------------\n\n")
+       ,call.=FALSE)  
 } else {
   cat("Evaluating Fisher's Exact test\n")
-  FisherTest(args[1],args[2],args[3])
+  FisherTest(args[1],args[2],args[3],args[4])
 }
 
 

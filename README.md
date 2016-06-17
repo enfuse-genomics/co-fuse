@@ -80,6 +80,15 @@ TODO:
 -->
 
 
+### Known errors
+
+```
+./demo.sh: line 16: Rscript: command not found
+./demo.sh: line 17: Rscript: command not found
+./demo.sh: line 18: Rscript: command not found
+```
+Rstudio has not been installed. Please follow the instruction above to install RStudio.
+
 ## References
 
 [1] Edgren,H., Murumagi,A., Kangaspeska,S., Nicorici,D., Hongisto,V., Kleivi,K., Rye,I.H., Nyberg,S., Wolf,M., Borresen-Dale,A.L. et al. (2011) Identification of fusion genes in breast cancer by paired-end RNA-sequencing. Genome Biol., 12, R6.

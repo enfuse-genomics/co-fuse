@@ -13,7 +13,8 @@ if [ ! -f ./FusionCatcher.tar.gz ]; then
     tar xzf FusionCatcher.tar.gz
 fi
 
-Rscript --vanilla co-fuse.R './FusionCatcher/AML' './output_AML' $TSNE_PERPLEXITY
-Rscript --vanilla co-fuse.R './FusionCatcher/MM' './output_MM' $TSNE_PERPLEXITY
-Rscript --vanilla co-fuse2.R './FusionCatcher/AML' './FusionCatcher/MM' './output_fisher_test'
+mkdir -p output_fusioncatcher
+Rscript --vanilla co-fuse.R 'FusionCatcher' './FusionCatcher/AML' './output_fusioncatcher/AML' $TSNE_PERPLEXITY
+Rscript --vanilla co-fuse.R 'FusionCatcher' './FusionCatcher/MM' './output_fusioncatcher/MM' $TSNE_PERPLEXITY
+Rscript --vanilla co-fuse2.R 'FusionCatcher' './FusionCatcher/AML' './FusionCatcher/MM' './output_fusioncatcher/fisher_test'
 
