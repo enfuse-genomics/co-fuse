@@ -16,8 +16,9 @@ fusion.plot.heatmat <- function(data, outfilename)
   data.1 <- as.matrix(data[, 3:n])
   rownames(data.1) <- data$fusion
   my_palette <- colorRampPalette(c("grey", "black", "red"))
-  pdfwidth <- ceiling(log(nrow(data.1))*3) + 1
-  pdf(file=outfilename,width=pdfwidth,height=pdfwidth,paper='special')
+  pdfheight <- ceiling(log(nrow(data.1))*4) + 1
+  pdfwidth <- ceiling(log(ncol(data.1))*3) + 1
+  pdf(file=outfilename,width=pdfwidth,height=pdfheight,paper='special')
   heatmap.2(data.1, col=my_palette, distfun=function(x) dist(x, method="binary"), 
             hclustfun=function(x) hclust(x, method="ward"), scale="none", 
             cexRow=0.4, cexCol=0.5, density.info="none", trace="none", key=TRUE, symkey=FALSE)
@@ -28,9 +29,9 @@ fusion.plot.heatmat <- function(data, outfilename)
 fusion.plot.tsne <- function(data, perplexity=perplexity, outfilename)
 {
   #data$fusion <- paste(data$geneA, data$geneB, sep="-")
-  n <- length(colnames(data))-1
+  n <- length(colnames(data))
   data.1 <- as.matrix(data[, 3:n])
-  pdfwidth <- ceiling(log(nrow(data.1))*3) + 1
+  pdfwidth <- ceiling(log(ncol(data.1))*3) + 1
   pdf(file=outfilename,width=pdfwidth,height=pdfwidth,paper='special')
   set.seed(123)
   d <- dist(t(data.1), method="binary")
@@ -211,7 +212,7 @@ countGene <- function(software,inputDir,outputDir,tsne_perplexity=5) {
   # save figure (bar plot)
   #############################################################################  
   barplot.AB.filename <- paste0(outputDir,'/barplot.AB.pdf')
-  pdfheight <- ceiling(log(nrow(res.AB))*3) + 1
+  pdfheight <- ceiling(log(nrow(res.AB))*4) + 1
   pdf(barplot.AB.filename,width=6,height=pdfheight,paper='special')
   par(las=2)
   par(mar=c(5,8,4,2)) # bottom,left,top,right

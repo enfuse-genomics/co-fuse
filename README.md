@@ -101,6 +101,7 @@ The output will be stored in the folder `./output_fisher_test`. It consists of:
 TODO:
 1. Fix co-fuse2.R to accept 3 arguments and check if the first 2 arguments contain more than one sample
 2. Write more description on Fisher's Exact test
+
 -->
 
 

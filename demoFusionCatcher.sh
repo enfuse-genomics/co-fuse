@@ -13,6 +13,11 @@ if [ ! -f ./FusionCatcher.tar.gz ]; then
     tar xzf FusionCatcher.tar.gz
 fi
 
+if [ ! -d ./FusionCatcher ]; then
+    echo "Folder 'FusionCatcher' cannot be found. Please unzip FusionCatcher.tar.gz"
+    exit 1
+fi
+
 mkdir -p output_fusioncatcher
 Rscript --vanilla co-fuse.R 'FusionCatcher' './FusionCatcher/AML' './output_fusioncatcher/AML' $TSNE_PERPLEXITY
 Rscript --vanilla co-fuse.R 'FusionCatcher' './FusionCatcher/MM' './output_fusioncatcher/MM' $TSNE_PERPLEXITY
