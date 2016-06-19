@@ -34,4 +34,4 @@ cp -r FusionCatcher/MM/* FusionCatcher/AML_MM
 mkdir -p output_reproduce_results
 Rscript --vanilla co-fuse.R 'FusionCatcher' './FusionCatcher/AML_MM' './output_reproduce_results/AML_MM' $TSNE_PERPLEXITY
 
-Rscript --vanilla co-fuse2.R 'FusionCatcher' './FusionCatcher/AML' './FusionCatcher/MM' './output_fusioncatcher/fisher_test'
+Rscript --vanilla co-fuse2.R 'FusionCatcher' './FusionCatcher/AML' './FusionCatcher/MM' './output_reproduce_results/fisher_test'
