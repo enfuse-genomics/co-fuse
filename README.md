@@ -27,7 +27,7 @@ Rscript --vanilla co-fuse.R 'software' 'SOFTWARE_RESULTS/muliple_samples' './out
 ```
 
 Here `'software'` is set to one of the following softwares: '_defuse_', '_fusioncatcher_', '_tophat_', '_soapfuse_' or '_generic_'.
-`_TSNE_PERPLEXITY_` represents the perplexity parameter. It can be thought as a parameter that sets the number of effective nearest neighbors. A larger or denser dataset requires a larger perplexity. Typical values for the perplexity range between 5 and 50. We use the perplexity of 5 in our experiments.
+`_TSNE_PERPLEXITY_` represents the perplexity parameter. It can be thought as a parameter that sets the number of effective nearest neighbors. A larger or denser dataset requires a larger perplexity. Typical values for the perplexity range between 5 and 50. We use the perplexity of 6 in our experiments.
 
 The output will be stored in the folder `./output_dir`. It consists of multiple files:
 

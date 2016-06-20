@@ -33,7 +33,7 @@ fusion.plot.tsne <- function(data, perplexity=perplexity, outfilename)
   data.1 <- as.matrix(data[, 3:n])
   pdfwidth <- ceiling(log(ncol(data.1))*3) + 1
   pdf(file=outfilename,width=pdfwidth,height=pdfwidth,paper='special')
-  set.seed(123)
+  set.seed(12345)
   d <- dist(t(data.1), method="binary")
   tsne.data <- tsne(d,perplexity=perplexity)
   rownames(tsne.data)<- colnames(data.1)
@@ -46,7 +46,7 @@ fusion.plot.tsne <- function(data, perplexity=perplexity, outfilename)
 
 
 
-countGene <- function(software,inputDir,outputDir,tsne_perplexity=5) { 
+countGene <- function(software,inputDir,outputDir,tsne_perplexity=6) { 
   fusionSoftware <- tolower(software)
   if (fusionSoftware == 'fusioncatcher') {
     filepattern <- '*.GRCh37.txt'

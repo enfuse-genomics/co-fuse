@@ -1,6 +1,6 @@
  #!/bin/sh
 
-TSNE_PERPLEXITY=5
+TSNE_PERPLEXITY=6
 
 if [ ! -f ./FusionCatcher.tar.gz ]; then
     echo "Downloading test data set"
