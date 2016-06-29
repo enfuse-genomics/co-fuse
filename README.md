@@ -1,6 +1,7 @@
 # Co-fuse: A recurrent fusions identification and analysis tool based on RNA-sequencing
 
-Co-fuse implements a technique described in Co-fuse: a recurrent fusions identification and analysis tool based on RNA-sequencing. The program is written in R.
+Co-fuse implements a technique described in "Co-fuse: a recurrent fusions identification and analysis tool based on RNA-sequencing". 
+Co-fuse identifies and compares recurrent fusion genes across different samples. It relies on the results of existing fusion gene detection tools. The program is written in R.
 
 ## Requirements
 
