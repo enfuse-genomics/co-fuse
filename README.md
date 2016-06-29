@@ -124,6 +124,24 @@ Rstudio has not been installed. Please follow the instruction above to install R
 
 ## References
 
+Jia, W., Qiu, K., He, M., Song, P., Zhou, Q., Zhou, F., et al. (2013). SOAPfuse:
+an algorithm for identifying fusion transcripts from paired-end RNA-Seq data.
+Genome biology, 14(2).
+
+Kim, D. and Salzberg, S. L. (2011). TopHat-Fusion: an algorithm for discovery of
+novel fusion transcripts. Genome biology, 12(8), R72.
+
+McPherson, A., Hormozdiari, F., Zayed, A., Giuliany, R., Ha, G., Sun, M. G.,
+Griffith, M., Moussavi, A. H., Senz, J., Melnyk, N., et al. (2011). deFuse: an
+algorithm for gene fusion discovery in tumor RNA-Seq data. PLoS Computational
+Biology, 7(5).
+
+
+Nicorici, D., Satalan, M., Edgren, H., Kangaspeska, S., Murumagi, A., Kallioniemi,
+O., et al. (2014). FusionCatcher - a tool for finding somatic fusion genes in paired-
+end RNA-sequencing data. bioRxiv.
+
+<!--
 Agrawal, R., Imielinski, T., and Swami, A. (1993). Mining association rules between
 sets of items in large databases. In Proc. ACM SIGMOD International Conference
 on Management of Data, pages 207–216.
@@ -187,4 +205,4 @@ torrential data. Database : the journal of biological databases and curation.
 
 Wong, S. and Witte, O. N. (2004). The bcr-abl story: bench to bedside and back.
 Annual review of immunology, 22, 247–306.
-
+-->
