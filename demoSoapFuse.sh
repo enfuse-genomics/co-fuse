@@ -37,3 +37,7 @@ mkdir -p output_soapfuse
 Rscript --vanilla co-fuse.R 'SoapFuse' './SoapFuse/GROUP12' './output_soapfuse/recurrent' $TSNE_PERPLEXITY
 Rscript --vanilla co-fuse2.R 'SoapFuse' './SoapFuse/GROUP1' './SoapFuse/GROUP2' './output_soapfuse/fisher_test'
 
+echo "Output can be found under the directory ./output_soapfuse"
+
+
+

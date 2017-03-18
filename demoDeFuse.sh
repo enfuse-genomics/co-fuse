@@ -40,3 +40,7 @@ mkdir -p output_defuse
 Rscript --vanilla co-fuse.R 'DeFuse' './DeFuse/GROUP12' './output_defuse/recurrent' $TSNE_PERPLEXITY
 Rscript --vanilla co-fuse2.R 'DeFuse' './DeFuse/GROUP1' './DeFuse/GROUP2' './output_defuse/fisher_test'
 
+echo "Output can be found under the directory ./output_defuse"
+
+
+

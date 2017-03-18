@@ -54,3 +54,5 @@ mkdir -p output_fusioncatcher
 Rscript --vanilla co-fuse.R 'FusionCatcher' './FusionCatcher/AML_MM' './output_fusioncatcher/recurrent' $TSNE_PERPLEXITY
 Rscript --vanilla co-fuse2.R 'FusionCatcher' './FusionCatcher/AML' './FusionCatcher/MM' './output_fusioncatcher/fisher_test'
 
+echo "Output can be found under the directory ./output_fusioncatcher"
+

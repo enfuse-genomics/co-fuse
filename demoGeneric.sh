@@ -37,3 +37,6 @@ mkdir -p output_generic
 Rscript --vanilla co-fuse.R 'Generic' './Generic/GROUP12' './output_generic/recurrent' $TSNE_PERPLEXITY
 Rscript --vanilla co-fuse2.R 'Generic' './Generic/GROUP1' './Generic/GROUP2' './output_generic/fisher_test'
 
+
+echo "Output can be found under the directory ./output_generic"
+

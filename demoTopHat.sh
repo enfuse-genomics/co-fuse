@@ -39,3 +39,5 @@ mkdir -p output_tophat
 Rscript --vanilla co-fuse.R 'TopHat' './TopHat/GROUP12' './output_tophat/recurrent' $TSNE_PERPLEXITY
 Rscript --vanilla co-fuse2.R 'TopHat' './TopHat/GROUP1' './TopHat/GROUP2' './output_tophat/fisher_test'
 
+echo "Output can be found under the directory ./output_tophat"
+
