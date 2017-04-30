@@ -6,15 +6,16 @@
 #
 
 library(dplyr)
+library(rpart)
+library(rpart.plot)
 
 source('./global.R')
 
-
 #
-# Return fusion with the number of samples 
+# Extract a table where each row represents geneA/geneB
+# and each col represents samples
 #
-countSamples <- function(software,inputDir) { 
-  
+extractFeatures <- function(software,inputDir) { 
   fusionSoftware <- tolower(software)
   if (fusionSoftware == 'fusioncatcher') {
     filepattern <- '*.GRCh37.txt'
@@ -71,14 +72,56 @@ countSamples <- function(software,inputDir) {
   # exclude a pair of genes (geneA, geneB) that occur only in one sample
   merged.AB[is.na(merged.AB)] <- 0
   
+  return(merged.AB)
+}
+
+
+#
+# Return fusion with the number of samples 
+#
+countSamples <- function(software,inputDir) { 
+
+  merged.AB <- extractFeatures(software,inputDir)
+  
   #############################################################################
   # Summarize the results (gene, #samples, total samples)
   ############################################################################# 
+  folders <- list.dirs(path=inputDir,full.names=TRUE,recursive=TRUE)
+  numFolders <- length(folders)  
+  
   res.AB <- data.frame(geneA=merged.AB$geneA,geneB=merged.AB$geneB,
                        NumSamples=0,TotalSamples=numFolders-1,stringsAsFactors = F)
   res.AB$NumSamples <- rowSums(merged.AB[,-(1:2)])
   
   return(res.AB)
+}
+
+
+# build Decision Tree to separate two groups (e.g., AML and MM)
+buildDT <- function(software,inputDirGroup1,inputDirGroup2,outputDir) { 
+  feat1 <- extractFeatures(software,inputDirGroup1)
+  feat2 <- extractFeatures(software,inputDirGroup2)
+  feat <- full_join(feat1,feat2,by=c('geneA','geneB'))
+  # replace NA with 0
+  feat[is.na(feat)] <- 0
+  rownames(feat) <- paste0(feat$geneA,':',feat$geneB)
+  feat$geneA <- NULL
+  feat$geneB <- NULL
+  dat <- data.frame(t(feat),stringsAsFactors = F)
+  colnames(dat) <- rownames(feat)
+  dat[] <- lapply(dat,as.character)
+  dat[] <- ifelse(dat=='1','Y','N')
+  label <- gsub('(.+)-.+','\\1',rownames(dat))
+  dat$label <- as.factor(label)
+  
+  # run decision tree and save the result
+  fit <- rpart(label ~ ., data=dat, method="class")
+  
+  outputFilename <- paste0(outputDir,'/DecisionTree.png')
+  png(filename=outputFilename)
+  prp(fit,varlen=0)
+  dev.off()
+  cat('Decision tree output saved to',outputFilename,'\n')
 }
 
 
@@ -172,8 +215,9 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)!=4) {
   stop(paste("\n\n--------------------------------------------------------------------------------------\n\n",
              "Four arguments must be provided.\n",
-             "Usage: Rscript co-fuse2.R _GROUP_1_INPUT_FOLDER_  _GROUP_2_INPUT_FOLDER_  _OUTPUT_FOLDER_ \n\n",
-             "where _SOFTWARE_ is one of 'defuse', 'fusioncatcher', 'tophat', 'soapfuse' or 'generic'\n",
+             "Usage: Rscript co-fuse2.R _SOFTWARE_  _GROUP_1_INPUT_FOLDER_  _GROUP_2_INPUT_FOLDER_  _OUTPUT_FOLDER_ \n\n",
+             "where\n",
+             "      _SOFTWARE_ is one of 'defuse', 'fusioncatcher', 'tophat', 'soapfuse' or 'generic'\n",
              "      _GROUP_1_INPUT_FOLDER_  is the folder containing the output of fusion software (GROUP 1)\n",
              "      _GROUP_2_INPUT_FOLDER_  is the folder containing the output of fusion software (GROUP 2)\n",
              "      _OUTPUT_FOLDER_ is the folder containing the output of Co-Fuse\n",
@@ -182,6 +226,9 @@ if (length(args)!=4) {
 } else {
   cat("Evaluating Fisher's Exact test\n")
   FisherTest(args[1],args[2],args[3],args[4])
+  cat("Building Decision tree\n")
+  buildDT(args[1],args[2],args[3],args[4])
+  cat("------------------------------\n")
 }
 
 
