@@ -13,6 +13,8 @@ library(dplyr)
 library(tsne)
 library(gplots)
 
+source('./global.R')
+
 fusion.plot.heatmat <- function(data, outfilename)
 {
   data$fusion <- paste(data$geneA, data$geneB, sep="-")
@@ -46,100 +48,6 @@ fusion.plot.tsne <- function(data, perplexity=perplexity, outfilename)
   abline(h=0,v=0,col="gray75")
   dev.off()
 }
-
-#
-# Helper functions for appending additional information
-# from other databases
-#
-
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
-
-#
-# Append the new column (colname) to the input data (dat)
-# the value in the new column is set to 'geneA','geneB' or'Both'
-# if the input gene matches the values in dat$geneA, dat$geneB or both
-#
-helper.oneGene <- function(dat,colname,gene) {
-  gene1 <- trim(gene)
-  gene1 <- data.frame(gene=gene1[!duplicated(gene1)],Indicator=1,stringsAsFactors = F)
-  dat1 <- left_join(dat,gene1,by=c('geneA'='gene'))
-  dat2 <- left_join(dat,gene1,by=c('geneB'='gene'))
-  indicator <- cbind(dat1$Indicator,dat2$Indicator)
-  indicator[is.na(indicator)] <- 0
-  combined <- data.frame(key=2*indicator[,1] + indicator[,2])
-  lookupTable <- data.frame(key=0:3,value=c('','GeneB','GeneA','Both'),stringsAsFactors = F)
-  combined <- left_join(combined,lookupTable,by=c('key'))
-  res <- dat; res[,colname] <- combined$value
-  res
-}
-
-#
-# Append the new column (colname) to the input data (dat)
-# the value in the new column is set to TRUE if the input geneA and geneB
-# match the values in dat$geneA and dat$geneB
-#
-helper.twoGenes <- function(dat,colname,geneA,geneB) {
-  genes1 <- data.frame(geneA=trim(geneA),geneB=trim(geneB),Indicator=1,stringsAsFactors=F)
-  genes1 <- genes1[!duplicated(genes1),]
-  dat1 <- left_join(dat,genes1,by=c('geneA'='geneA','geneB'='geneB'))
-  dat2 <- left_join(dat,genes1,by=c('geneA'='geneB','geneB'='geneA'))
-  indicator <- cbind(dat1$Indicator,dat2$Indicator)
-  indicator[is.na(indicator)] <- 0
-  indicator <- as.character(rowSums(indicator))
-  indicator[indicator=='0'] = ''
-  indicator[indicator!=''] = 'Y'
-  res <- dat; res[,colname] <- indicator
-  res
-}
-
-#
-# Given the database (DBName), it appends an additional column to 
-# indicate if geneA and geneB can be found in the given database
-#
-lookup.DB <- function(dat,DBName) {
-  switch(DBName,
-         Human_TSG={
-           db <- read.csv('./databases/Human_TSGs.txt',sep='\t',stringsAsFactors = F)
-           gene <- db$GeneSymbol
-           return(helper.oneGene(dat,'Human_TSG',gene))
-         },
-         PanCancer_TSG={
-           db <- read.csv('./databases/All_down_exp_TSGs_pan-cancer.txt',sep='\t',stringsAsFactors = F)
-           gene <- db$GeneName  
-           return(helper.oneGene(dat,'PanCaner_TSG',gene))
-         },
-         Oncogene={
-           db <- read.csv('./databases/allOnco_Feb2017.tsv',sep='\t',stringsAsFactors = F)
-           gene <- db$symbol
-           return(helper.oneGene(dat,'Onco',gene))
-         },
-         COSMIC={
-           db <- read.csv('./databases/Census_allSat Mar 11 09_32_39 2017.csv',stringsAsFactors = F)
-           gene <- db$Gene.Symbol
-           return(helper.oneGene(dat,'COSMIC',gene))
-         },
-         ChimerKB={
-           db <- read.csv('./databases/ChimerDB3.0_ChimerKB.csv',stringsAsFactors = F)
-           geneA <- db$H_gene; geneB <- db$T_gene
-           return(helper.twoGenes(dat,'ChimerKB',geneA,geneB))
-         },
-         ChimerPub={
-           db <- read.csv('./databases/ChimerDB3.0_ChimerPub.csv',stringsAsFactors = F)
-           geneA <- db$H_gene; geneB <- db$T_gene
-           return(helper.twoGenes(dat,'ChimerPub',geneA,geneB))
-         },
-         ChimeSeq={
-           db <- read.csv('./databases/ChimerDB3.0_ChimerSeq.csv',stringsAsFactors = F)
-           geneA <- db$H_gene; geneB <- db$T_gene
-           return(helper.twoGenes(dat,'ChimerSeq',geneA,geneB))
-         },
-         {
-           # default, do nothing
-           return(dat)
-         }
-  )
-}
-
 
 
 #
@@ -317,7 +225,9 @@ countGene <- function(software,inputDir,outputDir,tsne_perplexity=5) {
   tmp.res.AB <- res.AB %>% select(geneA,geneB,NumSamples)
   
   # lookup geneA and geneB in other databases
-  DB <- c('Human_TSG', 'PanCancer_TSG', 'Oncogene', 'COSMIC', 'ChimerKB', 'ChimerPub', 'ChimeSeq')
+  DB <- c('Human_TSG', 'PanCancer_TSG', 'Oncogene', 'COSMIC', 'Kinase',
+          'ChimerKB', 'ChimerPub', 'ChimeSeq'
+          )
   for (db in DB) {
     tmp.res.AB <- lookup.DB(tmp.res.AB,db)
   }

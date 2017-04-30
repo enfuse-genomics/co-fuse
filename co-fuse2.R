@@ -7,6 +7,9 @@
 
 library(dplyr)
 
+source('./global.R')
+
+
 #
 # Return fusion with the number of samples 
 #
@@ -136,6 +139,18 @@ FisherTest <- function(software,inputDirGroup1,inputDirGroup2,outputDir) {
   
   # sort them based on p-value
   res <- res[with(res,order(pvalue)),]
+  
+  
+  
+  tmp.res.AB <- res %>% select(geneA,geneB)
+  # lookup geneA and geneB in other databases
+  DB <- c('Human_TSG', 'PanCancer_TSG', 'Oncogene', 'COSMIC', 'Kinase',
+          'ChimerKB', 'ChimerPub', 'ChimeSeq'
+  )
+  for (db in DB) {
+    tmp.res.AB <- lookup.DB(tmp.res.AB,db)
+  }
+  res <- inner_join(res,tmp.res.AB, by=c("geneA","geneB"))  
   
   
   #===========================================================================
