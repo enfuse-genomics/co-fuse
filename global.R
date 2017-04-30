@@ -1,4 +1,4 @@
-
+library(gplots)
 #
 # Helper functions for appending additional information
 # from other databases
@@ -95,5 +95,31 @@ lookup.DB <- function(dat,DBName) {
            return(dat)
          }
   )
+}
+
+
+fusion.plot.heatmat <- function(data, outfilename,exRowCol)
+{
+  if(missing(exRowCol)) {
+    cexRowValue <- 0.4
+    cexColValue <- 0.5
+  } else {
+    cexRowValue <- exRowCol[1]
+    cexColValue <- exRowCol[2]
+  }
+  data$fusion <- paste(data$geneA, data$geneB, sep=" : ")
+  n <- length(colnames(data))-1
+  data.1 <- as.matrix(data[, 3:n])
+  rownames(data.1) <- data$fusion
+  my_palette <- colorRampPalette(c("grey", "black", "red"))
+  pdfheight <- ceiling(log(nrow(data.1))*4) + 1
+  pdfwidth <- ceiling(log(ncol(data.1))*3) + 1
+  pdf(file=outfilename,width=pdfwidth,height=pdfheight,paper='special')
+  heatmap.2(data.1, col=my_palette, distfun=function(x) dist(x, method="binary"), 
+            hclustfun=function(x) hclust(x, method="ward"), scale="none", 
+            cexRow=cexRowValue, cexCol=cexColValue, density.info="none", 
+            trace="none", key=TRUE, symkey=FALSE,
+            margins=c(8,10))
+  dev.off()
 }
 

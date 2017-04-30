@@ -11,25 +11,10 @@
 
 library(dplyr)
 library(tsne)
-library(gplots)
+
 
 source('./global.R')
 
-fusion.plot.heatmat <- function(data, outfilename)
-{
-  data$fusion <- paste(data$geneA, data$geneB, sep="-")
-  n <- length(colnames(data))-1
-  data.1 <- as.matrix(data[, 3:n])
-  rownames(data.1) <- data$fusion
-  my_palette <- colorRampPalette(c("grey", "black", "red"))
-  pdfheight <- ceiling(log(nrow(data.1))*4) + 1
-  pdfwidth <- ceiling(log(ncol(data.1))*3) + 1
-  pdf(file=outfilename,width=pdfwidth,height=pdfheight,paper='special')
-  heatmap.2(data.1, col=my_palette, distfun=function(x) dist(x, method="binary"), 
-            hclustfun=function(x) hclust(x, method="ward"), scale="none", 
-            cexRow=0.4, cexCol=0.5, density.info="none", trace="none", key=TRUE, symkey=FALSE)
-  dev.off()
-}
 
 
 fusion.plot.tsne <- function(data, perplexity=perplexity, outfilename)

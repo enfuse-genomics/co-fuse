@@ -11,6 +11,11 @@ library(rpart.plot)
 
 source('./global.R')
 
+DECISION_TREE_FILENAME <- '/DecisionTree.png'
+FISHER_RESULTS_FILENAME <- '/twoGroups.csv'
+HEATMAP_SIGGENE_FILENAME <- '/heatmap_significance.pdf'
+
+
 #
 # Extract a table where each row represents geneA/geneB
 # and each col represents samples
@@ -117,11 +122,41 @@ buildDT <- function(software,inputDirGroup1,inputDirGroup2,outputDir) {
   # run decision tree and save the result
   fit <- rpart(label ~ ., data=dat, method="class")
   
-  outputFilename <- paste0(outputDir,'/DecisionTree.png')
+  outputFilename <- paste0(outputDir,DECISION_TREE_FILENAME)
   png(filename=outputFilename)
   prp(fit,varlen=0)
   dev.off()
   cat('Decision tree output saved to',outputFilename,'\n')
+}
+
+
+# plot the heat map (hierarchical clustering) of significant recurrent genes
+# Assuming that we run the function FisherTest before we run
+# this function
+plotHeatMap <- function(software,inputDirGroup1,inputDirGroup2,outputDir) { 
+  fisherTestResFilename <- paste0(outputDir,FISHER_RESULTS_FILENAME)
+  if(!file.exists(fisherTestResFilename)){
+    stop("FisherTest() must be run before we call this function")
+  }
+  
+  # load fisher test results
+  fisher <- read.csv(file=fisherTestResFilename,stringsAsFactors = F)
+  # keep only the significant recurrent genes (p-value < 0.5)
+  fisher <- fisher[fisher$pvalue<0.05,]
+  fisher <- fisher %>% select(geneA,geneB)
+  
+  feat1 <- extractFeatures(software,inputDirGroup1)
+  feat2 <- extractFeatures(software,inputDirGroup2)  
+  feat <- full_join(feat1,feat2,by=c('geneA','geneB'))
+  # replace NA with 0
+  feat[is.na(feat)] <- 0
+  
+  # keep only significance genes
+  sigRecurrentGenes <- inner_join(feat,fisher,by=c('geneA','geneB'))
+  
+  heatmap.AB.filename <- paste0(outputDir,HEATMAP_SIGGENE_FILENAME)
+  fusion.plot.heatmat(sigRecurrentGenes, heatmap.AB.filename, c(0.8,0.6)) # 0.8xfontsize-row, 0.6x col
+  cat('The heatmap of significant recurrent fusion genes saved to',heatmap.AB.filename,'\n')
 }
 
 
@@ -204,7 +239,7 @@ FisherTest <- function(software,inputDirGroup1,inputDirGroup2,outputDir) {
   #############################################################################
   # save the summary results (gene, #samples, total samples, sample_ids)
   #############################################################################
-  write.csv(res,file=paste0(outputDir,'/twoGroups.csv'),row.names=F,quote=F)
+  write.csv(res,file=paste0(outputDir,FISHER_RESULTS_FILENAME),row.names=F,quote=F)
 }
 
 
@@ -228,6 +263,8 @@ if (length(args)!=4) {
   FisherTest(args[1],args[2],args[3],args[4])
   cat("Building Decision tree\n")
   buildDT(args[1],args[2],args[3],args[4])
+  cat("Plotting heat map of significant recurrent fusion genes\n")
+  plotHeatMap(args[1],args[2],args[3],args[4])
   cat("------------------------------\n")
 }
 
