@@ -16,6 +16,7 @@ install.packages("dplyr")
 install.packages("tsne")
 install.packages("ggplots")
 install.packages("rpart")
+install.packages("rpart.plot")
 ```
 
 ## Usage
