@@ -15,6 +15,7 @@ Please follow this [link](http://www.r-bloggers.com/installing-r-packages/) for 
 install.packages("dplyr")
 install.packages("tsne")
 install.packages("ggplots")
+install.packages("rpart")
 ```
 
 ## Usage
